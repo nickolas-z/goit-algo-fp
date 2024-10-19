@@ -1,58 +1,38 @@
-import uuid
+import dash
+from dash import dcc, html
+from dash.dependencies import Input, Output
+import plotly.express as px
+import numpy as np
 
-import networkx as nx
-import matplotlib.pyplot as plt
+# Приклад даних
+frame = np.random.rand(100, 100)  # Випадкова матриця
+
+# Ініціалізуємо додаток Dash
+app = dash.Dash(__name__)
+
+# Створюємо графік із Plotly
+fig = px.imshow(frame)
+fig.update_xaxes(showticklabels=True, title_text=f"Width: {frame.shape[1]}px")
+fig.update_yaxes(showticklabels=True, title_text=f"Height: {frame.shape[0]}px")
+fig.update_layout(autosize=False, width=500, height=500, coloraxis_showscale=True)
+
+# Описуємо структуру додатку
+app.layout = html.Div(
+    [dcc.Graph(id="interactive-plot", figure=fig), html.Div(id="output-div")]
+)
 
 
-class Node:
-    def __init__(self, key, color="skyblue"):
-        self.left = None
-        self.right = None
-        self.val = key
-        self.color = color # Додатковий аргумент для зберігання кольору вузла
-        self.id = str(uuid.uuid4()) # Унікальний ідентифікатор для кожного вузла
+# Визначаємо callback для взаємодії з графіком
+@app.callback(Output("output-div", "children"), Input("interactive-plot", "clickData"))
+def on_click(clickData):
+    if clickData is not None:
+        # Тут можна викликати вашу Python функцію
+        x = clickData["points"][0]["x"]
+        y = clickData["points"][0]["y"]
+        return f"You clicked on point: (x={x}, y={y})"
+    return "Click on the graph to see the coordinates."
 
-def add_edges(graph, node, pos, x=0, y=0, layer=1):
-    if node is not None:
-        graph.add_node(node.id, color=node.color, label=node.val) # Використання id та збереження значення вузла
-    if node.left:
-        graph.add_edge(node.id, node.left.id)
-        l = x - 1 / 2 ** layer
-        pos[node.left.id] = (l, y - 1)
-        l = add_edges(graph, node.left, pos, x=l, y=y - 1, layer=layer + 1)
-    if node.right:
-        graph.add_edge(node.id, node.right.id)
-        r = x + 1 / 2 ** layer
-        pos[node.right.id] = (r, y - 1)
-        r = add_edges(graph, node.right, pos, x=r, y=y - 1, layer=layer + 1)
-    return graph
 
-def draw_tree(tree_root):
-    tree = nx.DiGraph()
-    pos = {tree_root.id: (0, 0)}
-    tree = add_edges(tree, tree_root, pos)
-    colors = [node[1]['color'] for node in tree.nodes(data=True)]
-    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)} # Використовуйте значення вузла для міток
-    plt.figure(figsize=(8, 5))
-    nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
-    plt.show()
-
-items = {
-    "pizza": {"cost": 50, "calories": 300},
-    "hamburger": {"cost": 40, "calories": 250},
-    "hot-dog": {"cost": 30, "calories": 200},
-    "pepsi": {"cost": 10, "calories": 100},
-    "cola": {"cost": 15, "calories": 220},
-    "potato": {"cost": 25, "calories": 350}
-}
-
-# Створення дерева
-root = Node(0)
-root.left = Node(4)
-root.left.left = Node(5)
-root.left.right = Node(10)
-root.right = Node(1)
-root.right.left = Node(3)
-
-# Відображення дерева
-draw_tree(root)
+# Запускаємо додаток
+if __name__ == "__main__":
+    app.run_server(debug=True)
