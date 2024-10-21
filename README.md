@@ -21,6 +21,7 @@
 
 ### Ресурси
 - [task1.py](./task1.py)
+- [LinkedList.py](./LinkedList.py)
 - [Module helpers](./helpers)
 
 ## Завдання 2. Рекурсія. Створення фрактала “дерево Піфагора” за допомогою рекурсії.
