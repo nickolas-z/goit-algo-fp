@@ -44,6 +44,7 @@
 
 ### Ресурси
 - [task3.py](./task3.py)
+- [graph_data.py](./graph_data.py)
 - [Module helpers](./helpers)
 
 ## Завдання 4. Візуалізація піраміди.

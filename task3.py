@@ -6,7 +6,7 @@ from graph_data import create_graph
 
 
 def dijkstra(graph, start)->tuple:
-    """ Find the shortest paths from the start node to all other nodes """
+    """ Пошук найкоротших шляхів від вказаної вершини до всіх інших вершин """
     distances = {node: float('infinity') for node in graph}
     distances[start] = 0
     # Priority queue
@@ -29,7 +29,7 @@ def dijkstra(graph, start)->tuple:
     return distances, previous
 
 def get_path(previous, start, end)->list:
-    """ Reconstruct the path from the previous dictionary """
+    """ Відновлення шляху """
     path = []
     current = end
     while current:
@@ -38,12 +38,12 @@ def get_path(previous, start, end)->list:
             break
         current = previous[current]
     if path[-1] != start:
-        # No path exists
+        # Немає шляху
         return None
     return path[::-1]
 
 def draw_graph(G)->None:
-    """ Visualize the graph """
+    """ Візуалізація графа """
     plt.figure(figsize=(14, 10))
     pos = nx.spring_layout(G, k=0.5, iterations=50)
     nx.draw(G, pos, with_labels=True, node_color='lightblue', 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     
     G = create_graph()
 
-    # Find the shortest paths between all pairs of nodes
+    # Пошук найкоротших шляхів між усіма парами вершин
     all_paths = {}
     for start in G.nodes:
         distances, previous = dijkstra(G, start)
@@ -77,11 +77,10 @@ if __name__ == "__main__":
                     print(f"Шлях від {start} до {end} не існує")
         all_paths[start] = paths_from_start
 
-    # Display the shortest paths
+    # Виведення найкоротших шляхів
     for start in G.nodes:
         print(f"\nНайкоротші шляхи від '{start}':")
         for end, (distance, path) in all_paths[start].items():
             print(f"  До '{end}': відстань = {distance:.1f} км, шлях = {' → '.join(path)}")
 
-    # Visualize the weighted graph
     draw_graph(G)
