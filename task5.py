@@ -1,58 +1,143 @@
-import uuid
-
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from BinTree import add_edges
+from task4 import build_heap_tree
+from collections import deque
+import copy
 
 
-class Node:
-    def __init__(self, key, color="skyblue"):
-        self.left = None
-        self.right = None
-        self.val = key
-        self.color = color # Додатковий аргумент для зберігання кольору вузла
-        self.id = str(uuid.uuid4()) # Унікальний ідентифікатор для кожного вузла
-
-def add_edges(graph, node, pos, x=0, y=0, layer=1):
-    if node is not None:
-        graph.add_node(node.id, color=node.color, label=node.val) # Використання id та збереження значення вузла
-    if node.left:
-        graph.add_edge(node.id, node.left.id)
-        l = x - 1 / 2 ** layer
-        pos[node.left.id] = (l, y - 1)
-        l = add_edges(graph, node.left, pos, x=l, y=y - 1, layer=layer + 1)
-    if node.right:
-        graph.add_edge(node.id, node.right.id)
-        r = x + 1 / 2 ** layer
-        pos[node.right.id] = (r, y - 1)
-        r = add_edges(graph, node.right, pos, x=r, y=y - 1, layer=layer + 1)
-    return graph
-
-def draw_tree(tree_root):
+def draw_tree(tree_root, ax, traversal_type="") -> None:
+    """ 
+    Візуалізація бінарного дерева
+    args:
+        tree_root: корінь дерева
+        ax: об'єкт візуалізації
+        traversal_type: тип обходу (DFS або BFS)
+    """
     tree = nx.DiGraph()
     pos = {tree_root.id: (0, 0)}
-    tree = add_edges(tree, tree_root, pos)
-    colors = [node[1]['color'] for node in tree.nodes(data=True)]
-    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)} # Використовуйте значення вузла для міток
-    plt.figure(figsize=(8, 5))
-    nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
+    add_edges(tree, tree_root, pos)
+
+    colors = [node[1]["color"] for node in tree.nodes(data=True)]
+    # Показуємо значення вузла в мітках
+    labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}  
+
+    ax.clear()
+    nx.draw(
+        tree,
+        pos=pos,
+        labels=labels,
+        arrows=False,
+        node_size=2500,
+        node_color=colors,
+        ax=ax,
+    )
+    ax.set_title(f"Обхід бінарного дерева: {traversal_type}", fontsize=16)
+
+
+def animate_traversal(tree_root, traversal_type="DFS")->None:
+    """
+    Анімація обходу бінарного дерева
+    Args:
+        tree_root: корінь дерева
+        traversal_type: тип обходу (DFS або BFS)
+    """
+    fig, ax = plt.subplots(figsize=(12, 8))
+    frames = []
+
+    if traversal_type == "DFS":
+        stack = [tree_root]
+        visited = set()
+
+        while stack:
+            node = stack.pop()
+            if node:
+                # Створюємо копію дерева, щоб змінювати лише колір вузлів у копії (оригінал залишається незмінним)
+                tree_copy = copy.deepcopy(tree_root)
+                node_copy = find_node_by_id(tree_copy, node.id)
+                if node_copy:
+                    # Жовтий колір для поточного вузла
+                    node_copy.color = "#FFFF00"
+                for visited_node in visited:
+                    visited_node_copy = find_node_by_id(tree_copy, visited_node.id)
+                    if visited_node_copy:
+                        # Відвідані вузли зображаємо темно-синім кольором
+                        visited_node_copy.color = "#1296F0"
+                frames.append(tree_copy)
+                visited.add(node)
+                stack.append(node.right)
+                stack.append(node.left)
+
+    elif traversal_type == "BFS":
+        queue = deque([tree_root])
+        visited = set()
+
+        while queue:
+            node = queue.popleft()
+            if node:
+                # Створюємо копію дерева, щоб змінювати лише колір вузлів у копії, а не в оригіналі
+                tree_copy = copy.deepcopy(tree_root)
+                node_copy = find_node_by_id(tree_copy, node.id)
+                if node_copy:
+                    # Поточний вузол відображається жовтим
+                    node_copy.color = "#FFFF00"
+                for visited_node in visited:
+                    visited_node_copy = find_node_by_id(tree_copy, visited_node.id)
+                    if visited_node_copy:
+                        # Відвідані вузли зображаємо темно-синім кольором
+                        visited_node_copy.color = "#1296F0"
+                frames.append(tree_copy)
+                visited.add(node)
+                queue.append(node.left)
+                queue.append(node.right)
+
+    def update(frame, traversal_type):
+        draw_tree(frame, ax, traversal_type)
+
+    ani = animation.FuncAnimation(
+        fig, update, frames=frames, repeat=False, interval=500, fargs=(traversal_type,)
+    )
+    # Зберігаємо анімацію у файл
+    # ani.save(f"{traversal_type}_traversal.mp4", writer="ffmpeg")
+    ani.save(f"{traversal_type}_traversal.gif", writer="imagemagick")
     plt.show()
 
-items = {
-    "pizza": {"cost": 50, "calories": 300},
-    "hamburger": {"cost": 40, "calories": 250},
-    "hot-dog": {"cost": 30, "calories": 200},
-    "pepsi": {"cost": 10, "calories": 100},
-    "cola": {"cost": 15, "calories": 220},
-    "potato": {"cost": 25, "calories": 350}
-}
 
-# Створення дерева
-root = Node(0)
-root.left = Node(4)
-root.left.left = Node(5)
-root.left.right = Node(10)
-root.right = Node(1)
-root.right.left = Node(3)
+def find_node_by_id(tree_root, node_id)->None:
+    """ 
+    Пошук вузла за його ідентифікатором у дереві
+    args:
+        tree_root: корінь дерева
+        node_id: ідентифікатор вузла
+    """
+    if tree_root is None:
+        return None
+    if tree_root.id == node_id:
+        return tree_root
+    left_result = find_node_by_id(tree_root.left, node_id)
+    if left_result:
+        return left_result
+    return find_node_by_id(tree_root.right, node_id)
 
-# Відображення дерева
-draw_tree(root)
+
+def main():
+    """ Основна функція """
+    # Задання для бінарної купи
+    heap_array = [10, 5, 3, 2, 4, 1, 7, 6, 8, 9, 11, 12, 13, 14, 15]
+
+    # Створення дерева із купи
+    heap_tree_root = build_heap_tree(heap_array)
+
+    # Візуалізація обходу в глибину
+    if heap_tree_root:
+        print("Запуск DFS візуалізації")
+        animate_traversal(heap_tree_root, traversal_type="DFS")
+
+    # Візуалізація обходу в ширину
+    if heap_tree_root:
+        print("Запуск BFS візуалізації")
+        animate_traversal(heap_tree_root, traversal_type="BFS")    
+
+if __name__ == "__main__":
+    main()

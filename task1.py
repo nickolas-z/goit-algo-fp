@@ -39,7 +39,12 @@ class LList(LinkedList):
         self.head = sorted_list  # Оновлює голову списку
 
     def _sorted_insert(self, head: Optional[Node], node: Node) -> Node:
-        """Вставляє вузол у відсортований список."""
+        """
+        Вставляє вузол у відсортований список.
+        args:
+            head: Голова відсортованого списку
+            node: Вузол, який потрібно вставити
+        """
         if head is None or node.data < head.data:
             # Вставляємо вузол на початку списку
             node.next = head  
@@ -55,7 +60,13 @@ class LList(LinkedList):
         return head
 
     def merge_sorted_lists(self, other: "LList") -> "LList":
-        """Об'єднує два відсортованих списки."""
+        """
+        Об'єднує два відсортованих списки.
+        args:
+            other: Другий список, який потрібно об'єднати з поточним списком
+        returns:
+            merged_list: Об'єднаний список
+        """
         p1 = self.head
         p2 = other.head
         merged_list = LList()

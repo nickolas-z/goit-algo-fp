@@ -1,12 +1,19 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from collections import defaultdict
 import heapq
 from graph_data import create_graph
 
 
 def dijkstra(graph, start)->tuple:
-    """ Пошук найкоротших шляхів від вказаної вершини до всіх інших вершин """
+    """
+    Пошук найкоротших шляхів від вказаної вершини до всіх інших вершин
+    args:
+        graph: Граф
+        start: Початкова вершина
+    returns:
+        distances: Відстані до всіх вершин
+        previous: Попередні вершини для кожної вершини
+    """
     distances = {node: float('infinity') for node in graph}
     distances[start] = 0
     # Priority queue
@@ -29,7 +36,15 @@ def dijkstra(graph, start)->tuple:
     return distances, previous
 
 def get_path(previous, start, end)->list:
-    """ Відновлення шляху """
+    """
+    Відновлення шляху
+    args:
+        previous: Попередні вершини для кожної вершини
+        start: Початкова вершина
+        end: Кінцева вершина
+    returns:
+        list: Шлях
+    """
     path = []
     current = end
     while current:
@@ -43,7 +58,11 @@ def get_path(previous, start, end)->list:
     return path[::-1]
 
 def draw_graph(G)->None:
-    """ Візуалізація графа """
+    """
+    Візуалізація графа
+    args:
+        G: Граф
+    """
     plt.figure(figsize=(14, 10))
     pos = nx.spring_layout(G, k=0.5, iterations=50)
     nx.draw(G, pos, with_labels=True, node_color='lightblue', 
