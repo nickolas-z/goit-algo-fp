@@ -10,13 +10,13 @@ class LList(LinkedList):
         current = self.head
         while current is not None:
             # Зберігаємо посилання на наступний вузол
-            next_node = current.next  
+            next_node = current.next
             # Змінюємо посилання поточного вузла на попередній вузол
-            current.next = prev  
+            current.next = prev
             # Переміщуємо prev на поточний вузол
-            prev = current  
+            prev = current
             # Переміщуємо current на наступний вузол
-            current = next_node  
+            current = next_node
         # Змінюємо головний вузол на останній вузол списку
         self.head = prev
 
@@ -27,11 +27,11 @@ class LList(LinkedList):
             return None
 
         # Створюємо новий відсортований список
-        sorted_list = None  
+        sorted_list = None
         current = self.head
         while current:
             # Зберігаємо наступний вузол для проходу по списку
-            next_node = current.next  
+            next_node = current.next
             sorted_list = self._sorted_insert(
                 sorted_list, current
             )  # Вставляє вузол у відсортований список
@@ -47,13 +47,13 @@ class LList(LinkedList):
         """
         if head is None or node.data < head.data:
             # Вставляємо вузол на початку списку
-            node.next = head  
+            node.next = head
             return node
         else:
             current = head
             while current.next and current.next.data < node.data:
                 # Шукаємо де потрбітно зробити вставку
-                current = (current.next)
+                current = current.next
             # Вставка вузла
             node.next = current.next
             current.next = node
@@ -89,6 +89,7 @@ class LList(LinkedList):
             p2 = p2.next
 
         return merged_list
+
 
 if __name__ == "__main__":
     # кількість елементів списку для тестування

@@ -1,58 +1,135 @@
-import uuid
+from math import e
 
-import networkx as nx
-import matplotlib.pyplot as plt
+from matplotlib.pylab import f
 
 
-class Node:
-    def __init__(self, key, color="skyblue"):
-        self.left = None
-        self.right = None
-        self.val = key
-        self.color = color # Додатковий аргумент для зберігання кольору вузла
-        self.id = str(uuid.uuid4()) # Унікальний ідентифікатор для кожного вузла
+def calculate_ratios(items) -> dict:
+    """
+    Розрахунок співвідношення калорій до вартості для кожної страви
+    Args:
+        items: Список страв
+    Returns:
+        dict: Співвідношення калорій до вартості для кожної страви
+    """
+    return {item: items[item]["calories"] / items[item]["cost"] for item in items}
 
-def add_edges(graph, node, pos, x=0, y=0, layer=1):
-    if node is not None:
-        graph.add_node(node.id, color=node.color, label=node.val) # Використання id та збереження значення вузла
-    if node.left:
-        graph.add_edge(node.id, node.left.id)
-        l = x - 1 / 2 ** layer
-        pos[node.left.id] = (l, y - 1)
-        l = add_edges(graph, node.left, pos, x=l, y=y - 1, layer=layer + 1)
-    if node.right:
-        graph.add_edge(node.id, node.right.id)
-        r = x + 1 / 2 ** layer
-        pos[node.right.id] = (r, y - 1)
-        r = add_edges(graph, node.right, pos, x=r, y=y - 1, layer=layer + 1)
-    return graph
 
-def draw_tree(tree_root):
-    tree = nx.DiGraph()
-    pos = {tree_root.id: (0, 0)}
-    tree = add_edges(tree, tree_root, pos)
-    colors = [node[1]['color'] for node in tree.nodes(data=True)]
-    labels = {node[0]: node[1]['label'] for node in tree.nodes(data=True)} # Використовуйте значення вузла для міток
-    plt.figure(figsize=(8, 5))
-    nx.draw(tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors)
-    plt.show()
+def greedy_algorithm(items, budget) -> dict:
+    """
+    Жадібний алгоритм для вибору їжі з найкращим співвідношенням калорій до вартості
+    Args:
+        items: Список страв
+        budget: Бюджет
+    Returns:
+        dict: Результати вибору страв
+    """
+    ratios = calculate_ratios(items)
+    sorted_items = sorted(ratios.items(), key=lambda x: x[1], reverse=True)
 
-items = {
-    "pizza": {"cost": 50, "calories": 300},
-    "hamburger": {"cost": 40, "calories": 250},
-    "hot-dog": {"cost": 30, "calories": 200},
-    "pepsi": {"cost": 10, "calories": 100},
-    "cola": {"cost": 15, "calories": 220},
-    "potato": {"cost": 25, "calories": 350}
-}
+    selected_items = []
+    total_cost = 0
+    total_calories = 0
 
-# Створення дерева
-root = Node(0)
-root.left = Node(4)
-root.left.left = Node(5)
-root.left.right = Node(10)
-root.right = Node(1)
-root.right.left = Node(3)
+    for item, _ in sorted_items:
+        item_cost = items[item]["cost"]
+        item_calories = items[item]["calories"]
+        if total_cost + item_cost <= budget:
+            selected_items.append(item)
+            total_cost += item_cost
+            total_calories += item_calories
 
-# Відображення дерева
-draw_tree(root)
+    return {
+        "selected_items": selected_items,
+        "total_cost": total_cost,
+        "total_calories": total_calories,
+    }
+
+
+def dynamic_programming(items, budget) -> dict:
+    """
+    Алгоритм динамічного програмування для оптимального вибору їжі
+    Args:
+        items: Список страв
+        budget: Бюджет
+    Returns:
+        dict: Результати вибору страв
+    """
+    names = list(items.keys())
+    costs = [items[item]["cost"] for item in names]
+    calories = [items[item]["calories"] for item in names]
+    n = len(names)
+
+    table = [[0] * (budget + 1) for _ in range(n + 1)]
+
+    for i in range(1, n + 1):
+        for w in range(budget + 1):
+            if costs[i - 1] <= w:
+                table[i][w] = max(
+                    calories[i - 1] + table[i - 1][w - costs[i - 1]], table[i - 1][w]
+                )
+            else:
+                table[i][w] = table[i - 1][w]
+
+    selected_items = []
+    total_calories = table[n][budget]
+    w = budget
+
+    for i in range(n, 0, -1):
+        if table[i][w] != table[i - 1][w]:
+            selected_items.append(names[i - 1])
+            w -= costs[i - 1]
+
+    return {
+        "selected_items": selected_items[::-1],
+        "total_cost": budget - w,
+        "total_calories": total_calories,
+    }
+
+
+def test_algorithms(items, budget) -> None:
+    """
+    Тестування алгоритмів
+    Args:
+        items: Список страв
+        budget: Бюджет
+    Returns: None
+    """
+    print("-" * 50)
+    print(f"Тестування з бюджетом {budget} грн", end="\n\n")
+    print(f"Список страв: {', '.join(items.keys())}")
+
+    greedy_result = greedy_algorithm(items, budget)
+    print("Жадібний алгоритм:")
+    print(
+        f"\tВибрані страви: {', '.join(greedy_result['selected_items'])}\n"
+        f"\tЗагальна вартість: {greedy_result['total_cost']} грн\n"
+        f"\tЗагальна калорійність: {greedy_result['total_calories']} кал"
+    )
+
+    dp_result = dynamic_programming(items, budget)
+    print("Динамічне програмування:")
+    print(
+        f"\tВибрані страви: {', '.join(dp_result['selected_items'])}\n"
+        f"\tЗагальна вартість: {dp_result['total_cost']} грн\n"
+        f"\tЗагальна калорійність: {dp_result['total_calories']} кал",
+        end="\n\n",
+    )
+
+
+def main():
+    """Головна функція"""
+    items = {
+        "pizza": {"cost": 50, "calories": 300},
+        "hamburger": {"cost": 40, "calories": 250},
+        "hot-dog": {"cost": 30, "calories": 200},
+        "pepsi": {"cost": 10, "calories": 100},
+        "cola": {"cost": 15, "calories": 220},
+        "potato": {"cost": 25, "calories": 350},
+    }
+
+    for i in range(0, 200, 50):
+        test_algorithms(items, i)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,19 +1,20 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from BinTree import add_edges
+from BinTree import Node, add_edges
 from task4 import build_heap_tree
 from collections import deque
 import copy
 
 
 def draw_tree(tree_root, ax, traversal_type="") -> None:
-    """ 
+    """
     Візуалізація бінарного дерева
     args:
         tree_root: корінь дерева
         ax: об'єкт візуалізації
         traversal_type: тип обходу (DFS або BFS)
+    return: None
     """
     tree = nx.DiGraph()
     pos = {tree_root.id: (0, 0)}
@@ -21,7 +22,7 @@ def draw_tree(tree_root, ax, traversal_type="") -> None:
 
     colors = [node[1]["color"] for node in tree.nodes(data=True)]
     # Показуємо значення вузла в мітках
-    labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}  
+    labels = {node[0]: node[1]["label"] for node in tree.nodes(data=True)}
 
     ax.clear()
     nx.draw(
@@ -36,14 +37,16 @@ def draw_tree(tree_root, ax, traversal_type="") -> None:
     ax.set_title(f"Обхід бінарного дерева: {traversal_type}", fontsize=16)
 
 
-def animate_traversal(tree_root, traversal_type="DFS")->None:
+def animate_traversal(tree_root, traversal_type="DFS") -> None:
     """
     Анімація обходу бінарного дерева
     Args:
         tree_root: корінь дерева
         traversal_type: тип обходу (DFS або BFS)
+    Return: None
     """
     fig, ax = plt.subplots(figsize=(12, 8))
+    fig.canvas.manager.set_window_title("Анімація обходу бінарного дерева")
     frames = []
 
     if traversal_type == "DFS":
@@ -104,12 +107,13 @@ def animate_traversal(tree_root, traversal_type="DFS")->None:
     plt.show()
 
 
-def find_node_by_id(tree_root, node_id)->None:
-    """ 
+def find_node_by_id(tree_root, node_id) -> Node:
+    """
     Пошук вузла за його ідентифікатором у дереві
     args:
         tree_root: корінь дерева
         node_id: ідентифікатор вузла
+    return: Node
     """
     if tree_root is None:
         return None
@@ -122,7 +126,7 @@ def find_node_by_id(tree_root, node_id)->None:
 
 
 def main():
-    """ Основна функція """
+    """Основна функція"""
     # Задання для бінарної купи
     heap_array = [10, 5, 3, 2, 4, 1, 7, 6, 8, 9, 11, 12, 13, 14, 15]
 
@@ -137,7 +141,8 @@ def main():
     # Візуалізація обходу в ширину
     if heap_tree_root:
         print("Запуск BFS візуалізації")
-        animate_traversal(heap_tree_root, traversal_type="BFS")    
+        animate_traversal(heap_tree_root, traversal_type="BFS")
+
 
 if __name__ == "__main__":
     main()

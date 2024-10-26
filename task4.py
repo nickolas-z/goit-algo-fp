@@ -1,7 +1,7 @@
 from BinTree import Node, draw_tree
 
 
-def build_heap_tree(arr, index=0)->Node:
+def build_heap_tree(arr, index=0) -> Node:
     """
     Функція для побудови бінарного дерева з масиву
     args:
@@ -24,8 +24,8 @@ def build_heap_tree(arr, index=0)->Node:
     return node
 
 
-def main()->None:
-    """ Основна функція """
+def main() -> None:
+    """Основна функція"""
     # Задання для бінарної купи
     heap_array = [10, 5, 3, 2, 4, 1, 7, 6, 8, 9, 11, 12, 13, 14, 15]
 
@@ -34,7 +34,8 @@ def main()->None:
 
     # Візуалізація дерева
     if heap_tree_root:
-        draw_tree(heap_tree_root)
+        draw_tree(heap_tree_root, "Візуалізація піраміди")
+
 
 if __name__ == "__main__":
     main()

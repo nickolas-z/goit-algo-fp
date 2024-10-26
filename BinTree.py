@@ -44,7 +44,7 @@ def add_edges(graph, node, pos, x=0, y=0, layer=1) -> nx.DiGraph:
     return graph
 
 
-def draw_tree(tree_root) -> None:
+def draw_tree(tree_root, title="Tree") -> None:
     """
     Функція для візуалізації бінарного дерева
     Args:
@@ -60,7 +60,7 @@ def draw_tree(tree_root) -> None:
         node[0]: node[1]["label"] for node in tree.nodes(data=True)
     }  # Використовуйте значення вузла для міток
 
-    plt.figure(figsize=(8, 5))
+    plt.figure(title, figsize=(8, 5))
     nx.draw(
         tree, pos=pos, labels=labels, arrows=False, node_size=2500, node_color=colors
     )

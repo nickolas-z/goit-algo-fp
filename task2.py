@@ -1,7 +1,7 @@
 import turtle
 
 
-def treeFractal(TTL, recursionLevel, branchLength, branchReduction, angle)->None:
+def treeFractal(TTL, recursionLevel, branchLength, branchReduction, angle) -> None:
     """
     Малює фрактальне дерево за допомогою рекурсії.
     args:
@@ -39,7 +39,7 @@ def treeFractal(TTL, recursionLevel, branchLength, branchReduction, angle)->None
         TTL.backward(branchLength)
 
 
-def main()->None:
+def main() -> None:
     # Отримати введення користувача для рівня рекурсії
     recursionLevel = int(
         input("Введіть рівень рекурсії для створення фрактала “дерево Піфагора”: ")
@@ -47,6 +47,7 @@ def main()->None:
 
     # Налаштування вікна
     screen = turtle.Screen()
+    screen.title("Фрактальне дерево Піфагора")
     screen.setup(800, 600)
 
     # Налаштування
